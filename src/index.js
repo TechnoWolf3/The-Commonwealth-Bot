@@ -3,6 +3,7 @@ require('dotenv').config({ quiet: true });
 const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, GatewayIntentBits } = require('discord.js');
+const { startMinecraftBridgeServer } = require('./services/minecraftBridgeServer');
 
 const requiredEnvVars = ['DISCORD_TOKEN', 'CLIENT_ID', 'GUILD_ID'];
 const missingEnvVars = requiredEnvVars.filter((name) => !process.env[name]);
@@ -12,9 +13,13 @@ if (missingEnvVars.length > 0) {
   process.exit(1);
 }
 
-const client = new Client({
-  intents: [GatewayIntentBits.Guilds],
-});
+const intents = [GatewayIntentBits.Guilds];
+
+if (process.env.DISCORD_CHAT_CHANNEL_ID) {
+  intents.push(GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent);
+}
+
+const client = new Client({ intents });
 
 client.commands = new Collection();
 
@@ -67,6 +72,7 @@ process.on('uncaughtException', (error) => {
 
 loadCommands();
 loadEvents();
+startMinecraftBridgeServer(client);
 
 client.login(process.env.DISCORD_TOKEN).catch((error) => {
   console.error('Failed to log in to Discord:', error);

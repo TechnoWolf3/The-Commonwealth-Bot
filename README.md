@@ -29,9 +29,15 @@ SERVER_API_BASE_URL=
 SERVER_API_KEY=
 RULES_URL=
 RULES_TEXT=
+DISCORD_CHAT_CHANNEL_ID=
+MINECRAFT_BRIDGE_API_URL=
+MINECRAFT_BRIDGE_API_KEY=
+BRIDGE_HTTP_PORT=
 ```
 
 `MINECRAFT_HOST` is optional until the Minecraft server is hosted. `SERVER_API_BASE_URL` and `SERVER_API_KEY` are placeholders for the future server plugin/API that will power linking, balance, and player lookups.
+
+`DISCORD_CHAT_CHANNEL_ID`, `MINECRAFT_BRIDGE_API_URL`, and `MINECRAFT_BRIDGE_API_KEY` power the future two-way Minecraft chat bridge. Leave them blank until the server mod/plugin is ready.
 
 Register guild slash commands:
 
@@ -63,6 +69,18 @@ npm start
 - `/link` prepares Discord-to-Minecraft account linking.
 - `/player` looks up a Minecraft player profile once the server API exists.
 
+## Minecraft Chat Bridge
+
+The bot includes a framework for two-way Minecraft chat:
+
+- Discord messages from `DISCORD_CHAT_CHANNEL_ID` are forwarded to the Minecraft bridge API.
+- Minecraft chat events can be sent back to the bot at `POST /bridge/minecraft/chat`.
+- Both directions use `MINECRAFT_BRIDGE_API_KEY`.
+
+See [docs/minecraft-chat-bridge-contract.md](docs/minecraft-chat-bridge-contract.md) for the mod/plugin contract.
+
+To read normal Discord channel messages, enable **Message Content Intent** in the Discord Developer Portal before setting `DISCORD_CHAT_CHANNEL_ID`.
+
 ## Project Structure
 
 ```text
@@ -77,9 +95,12 @@ npm start
 |   |   `-- status.js
 |   |-- events
 |   |   |-- interactionCreate.js
+|   |   |-- messageCreate.js
 |   |   `-- ready.js
 |   |-- services
+|   |   |-- chatBridge.js
 |   |   |-- minecraftStatus.js
+|   |   |-- minecraftBridgeServer.js
 |   |   `-- serverApi.js
 |   |-- deploy-commands.js
 |   `-- index.js
