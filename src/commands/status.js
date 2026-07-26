@@ -18,16 +18,35 @@ module.exports = {
       return;
     }
 
+    const statusLabel = status.online
+      ? 'Online'
+      : status.reachable
+        ? 'Port reachable, status unavailable'
+        : 'Offline';
+    const statusColor = status.online ? 0x2ecc71 : status.reachable ? 0xf1c40f : 0xe74c3c;
+
     const embed = new EmbedBuilder()
       .setTitle('The Commonwealth Server Status')
-      .setColor(status.online ? 0x2ecc71 : 0xe74c3c)
+      .setColor(statusColor)
       .addFields(
-        { name: 'Status', value: status.online ? 'Online' : 'Offline', inline: true },
+        { name: 'Status', value: statusLabel, inline: true },
         { name: 'Address', value: status.address, inline: true },
         { name: 'Version', value: status.version, inline: true },
         { name: 'Players', value: `${status.players.online}/${status.players.max}`, inline: true },
       )
       .setTimestamp();
+
+    if (!status.online && status.reachable) {
+      embed.setFooter({
+        text: 'The server port is reachable, but the Minecraft status ping is not returning player/version data yet.',
+      });
+    }
+
+    if (status.statusError && !status.reachable) {
+      embed.setFooter({
+        text: 'The status provider could not be reached, and the Minecraft port did not answer from here.',
+      });
+    }
 
     if (status.motd) {
       embed.setDescription(status.motd);
