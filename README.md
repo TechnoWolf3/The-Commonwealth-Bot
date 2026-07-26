@@ -1,6 +1,6 @@
 # The Commonwealth Bot
 
-A minimal Discord bot for The Commonwealth Minecraft nations server.
+A modular Discord bot for The Commonwealth Minecraft nations server.
 
 ## Requirements
 
@@ -23,7 +23,15 @@ Create `.env` in the project root using `.env.example`:
 DISCORD_TOKEN=replace_me
 CLIENT_ID=replace_me
 GUILD_ID=replace_me
+MINECRAFT_HOST=
+MINECRAFT_PORT=25565
+SERVER_API_BASE_URL=
+SERVER_API_KEY=
+RULES_URL=
+RULES_TEXT=
 ```
+
+`MINECRAFT_HOST` is optional until the Minecraft server is hosted. `SERVER_API_BASE_URL` and `SERVER_API_KEY` are placeholders for the future server plugin/API that will power linking, balance, and player lookups.
 
 Register guild slash commands:
 
@@ -42,23 +50,42 @@ npm start
 1. Push the project to GitHub.
 2. Create a new Railway service from that repository.
 3. Add `DISCORD_TOKEN`, `CLIENT_ID`, and `GUILD_ID` through Railway Variables.
-4. Deploy using `npm start`.
-5. Never commit `.env`.
+4. Add optional Minecraft variables as the server/API becomes available.
+5. Deploy using `npm start`.
+6. Never commit `.env`.
+
+## Commands
+
+- `/ping` checks Discord gateway latency.
+- `/status` checks Minecraft server status once `MINECRAFT_HOST` is configured.
+- `/balance` privately checks the linked player's balance once the server API exists.
+- `/rules` shows the server rules.
+- `/link` prepares Discord-to-Minecraft account linking.
+- `/player` looks up a Minecraft player profile once the server API exists.
 
 ## Project Structure
 
 ```text
 .
-├── src
-│   ├── commands
-│   │   └── ping.js
-│   ├── events
-│   │   ├── interactionCreate.js
-│   │   └── ready.js
-│   ├── deploy-commands.js
-│   └── index.js
-├── .env.example
-├── .gitignore
-├── package.json
-└── README.md
+|-- src
+|   |-- commands
+|   |   |-- balance.js
+|   |   |-- link.js
+|   |   |-- ping.js
+|   |   |-- player.js
+|   |   |-- rules.js
+|   |   `-- status.js
+|   |-- events
+|   |   |-- interactionCreate.js
+|   |   `-- ready.js
+|   |-- services
+|   |   |-- minecraftStatus.js
+|   |   `-- serverApi.js
+|   |-- deploy-commands.js
+|   `-- index.js
+|-- .env.example
+|-- .gitignore
+|-- package-lock.json
+|-- package.json
+`-- README.md
 ```
