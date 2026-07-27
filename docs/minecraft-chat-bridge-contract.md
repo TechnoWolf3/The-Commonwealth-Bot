@@ -8,6 +8,7 @@ Discord bot / Railway:
 
 ```env
 DISCORD_CHAT_CHANNEL_ID=
+DISCORD_EVENTS_CHANNEL_ID=
 MINECRAFT_BRIDGE_API_URL=
 MINECRAFT_BRIDGE_API_KEY=
 ```
@@ -85,6 +86,51 @@ The Discord bot also accepts the API key through:
 
 ```http
 X-Bridge-Api-Key: <MINECRAFT_BRIDGE_API_KEY>
+```
+
+## Minecraft Events To Discord
+
+The Minecraft mod/plugin can also send structured server events to Discord. These go to `DISCORD_EVENTS_CHANNEL_ID` when set, otherwise they fall back to `DISCORD_CHAT_CHANNEL_ID`.
+
+Request:
+
+```http
+POST /bridge/minecraft/event
+Authorization: Bearer <MINECRAFT_BRIDGE_API_KEY>
+Content-Type: application/json
+```
+
+Body:
+
+```json
+{
+  "type": "player.advancement",
+  "username": "MinecraftPlayer",
+  "target": "Diamonds!",
+  "message": "MinecraftPlayer earned advancement Diamonds!"
+}
+```
+
+Supported event types:
+
+```text
+player.join
+player.leave
+player.death
+player.advancement
+nation.created
+nation.join
+nation.leave
+nation.relation
+server.alert
+```
+
+Expected response:
+
+```json
+{
+  "ok": true
+}
 ```
 
 ## Health Check

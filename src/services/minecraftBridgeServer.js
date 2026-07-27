@@ -1,5 +1,5 @@
 const http = require('node:http');
-const { sendMinecraftMessageToDiscord } = require('./chatBridge');
+const { sendMinecraftEventToDiscord, sendMinecraftMessageToDiscord } = require('./chatBridge');
 
 function readJsonBody(request) {
   return new Promise((resolve, reject) => {
@@ -52,7 +52,7 @@ function createMinecraftBridgeServer(client) {
       return;
     }
 
-    if (request.method !== 'POST' || request.url !== '/bridge/minecraft/chat') {
+    if (request.method !== 'POST') {
       sendJson(response, 404, { error: 'Not found.' });
       return;
     }
@@ -64,11 +64,23 @@ function createMinecraftBridgeServer(client) {
 
     try {
       const payload = await readJsonBody(request);
-      await sendMinecraftMessageToDiscord(client, payload);
-      sendJson(response, 202, { ok: true });
+
+      if (request.url === '/bridge/minecraft/chat') {
+        await sendMinecraftMessageToDiscord(client, payload);
+        sendJson(response, 202, { ok: true });
+        return;
+      }
+
+      if (request.url === '/bridge/minecraft/event') {
+        await sendMinecraftEventToDiscord(client, payload);
+        sendJson(response, 202, { ok: true });
+        return;
+      }
+
+      sendJson(response, 404, { error: 'Not found.' });
     } catch (error) {
-      console.error('Failed to process Minecraft chat bridge event:', error);
-      sendJson(response, 500, { error: 'Failed to process Minecraft chat event.' });
+      console.error('Failed to process Minecraft bridge event:', error);
+      sendJson(response, 500, { error: 'Failed to process Minecraft bridge event.' });
     }
   });
 }
@@ -76,19 +88,19 @@ function createMinecraftBridgeServer(client) {
 function startMinecraftBridgeServer(client) {
   const port = process.env.PORT || process.env.BRIDGE_HTTP_PORT;
 
-  if (!port || !process.env.DISCORD_CHAT_CHANNEL_ID || !process.env.MINECRAFT_BRIDGE_API_KEY) {
-    console.log('Minecraft chat bridge HTTP endpoint is not enabled.');
+  if (!port || !process.env.MINECRAFT_BRIDGE_API_KEY) {
+    console.log('Minecraft bridge HTTP endpoint is not enabled.');
     return null;
   }
 
   const server = createMinecraftBridgeServer(client);
 
   server.listen(Number(port), () => {
-    console.log(`Minecraft chat bridge HTTP endpoint listening on port ${port}.`);
+    console.log(`Minecraft bridge HTTP endpoint listening on port ${port}.`);
   });
 
   server.on('error', (error) => {
-    console.error('Minecraft chat bridge HTTP endpoint failed:', error);
+    console.error('Minecraft bridge HTTP endpoint failed:', error);
   });
 
   return server;

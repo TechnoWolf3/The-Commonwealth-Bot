@@ -48,6 +48,18 @@ async function getBalanceForDiscordUser(discordUserId) {
   return requestJson(`/discord/users/${discordUserId}/balance`);
 }
 
+async function getDiscordRoleSync(discordUserId) {
+  return requestJson(`/discord/users/${discordUserId}/role-sync`);
+}
+
+async function getNationProfile(nationName) {
+  return requestJson(`/nations/${encodeURIComponent(nationName)}`);
+}
+
+async function getOnlinePlayers() {
+  return requestJson('/players/online');
+}
+
 async function startAccountLink(discordUserId, minecraftUsername) {
   return requestJson('/discord/links', {
     method: 'POST',
@@ -62,9 +74,17 @@ async function getPlayerProfile(minecraftUsername) {
   return requestJson(`/players/${encodeURIComponent(minecraftUsername)}`);
 }
 
+async function getWeeklyDigest(days = 7) {
+  return requestJson(`/digest/weekly?days=${encodeURIComponent(days)}`);
+}
+
 module.exports = {
   ServerApiNotConfiguredError,
   getBalanceForDiscordUser,
+  getDiscordRoleSync,
+  getNationProfile,
+  getOnlinePlayers,
   getPlayerProfile,
+  getWeeklyDigest,
   startAccountLink,
 };

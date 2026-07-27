@@ -19,6 +19,10 @@ if (process.env.DISCORD_CHAT_CHANNEL_ID) {
   intents.push(GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent);
 }
 
+if (process.env.ROLE_SYNC_ENABLED === 'true') {
+  intents.push(GatewayIntentBits.GuildMembers);
+}
+
 const client = new Client({ intents });
 
 client.commands = new Collection();
