@@ -59,7 +59,17 @@ async function requestJson(endpoint, options = {}) {
     throw new ServerApiRequestError(response, message);
   }
 
-  return response.json();
+  if (response.status === 204) {
+    return { ok: true };
+  }
+
+  const text = await response.text();
+
+  if (!text) {
+    return { ok: true };
+  }
+
+  return JSON.parse(text);
 }
 
 async function getServerApiHealth() {
@@ -72,6 +82,16 @@ async function getBalanceForDiscordUser(discordUserId) {
 
 async function getDiscordRoleSync(discordUserId) {
   return requestJson(`/discord/users/${discordUserId}/role-sync`);
+}
+
+async function getDiscordLinkStatus(discordUserId) {
+  return requestJson(`/discord/users/${discordUserId}/link`);
+}
+
+async function unlinkDiscordUser(discordUserId) {
+  return requestJson(`/discord/users/${discordUserId}/link`, {
+    method: 'DELETE',
+  });
 }
 
 async function getNationProfile(nationName) {
@@ -104,6 +124,7 @@ module.exports = {
   ServerApiNotConfiguredError,
   ServerApiRequestError,
   getBalanceForDiscordUser,
+  getDiscordLinkStatus,
   getDiscordRoleSync,
   getNationProfile,
   getOnlinePlayers,
@@ -111,4 +132,5 @@ module.exports = {
   getServerApiHealth,
   getWeeklyDigest,
   startAccountLink,
+  unlinkDiscordUser,
 };

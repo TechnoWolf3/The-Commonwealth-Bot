@@ -21,6 +21,8 @@ GET  /players/online
 GET  /nations/{nationName}
 GET  /discord/users/{discordUserId}/balance
 POST /discord/links
+GET  /discord/users/{discordUserId}/link
+DELETE /discord/users/{discordUserId}/link
 GET  /discord/users/{discordUserId}/role-sync
 GET  /digest/weekly?days=7
 ```
@@ -158,7 +160,7 @@ Response:
 
 ## Account Linking
 
-Used by `/link`.
+Used by `/link`, `/linkstatus`, and `/unlink`.
 
 ```http
 POST /discord/links
@@ -194,6 +196,97 @@ Expected in-game flow:
 ```
 
 After the player verifies in game, persist the Discord user ID against their Minecraft UUID.
+
+### Link Status
+
+Used by `/linkstatus`.
+
+```http
+GET /discord/users/{discordUserId}/link
+```
+
+Return `200` even when there is no link. This avoids ambiguity between "not linked" and "endpoint missing".
+
+Confirmed linked response:
+
+```json
+{
+  "discordUserId": "123456789012345678",
+  "linked": true,
+  "minecraftUsername": "Sheyn",
+  "minecraftUuid": "00000000-0000-0000-0000-000000000000",
+  "linkedAt": "2026-07-29T02:00:00Z",
+  "nation": "Avalon",
+  "rank": "Minister",
+  "pending": null
+}
+```
+
+Pending response:
+
+```json
+{
+  "discordUserId": "123456789012345678",
+  "linked": false,
+  "minecraftUsername": null,
+  "minecraftUuid": null,
+  "linkedAt": null,
+  "nation": null,
+  "rank": null,
+  "pending": {
+    "minecraftUsername": "Sheyn",
+    "code": "483921",
+    "expiresAt": "2026-07-29T02:10:00Z"
+  }
+}
+```
+
+No link response:
+
+```json
+{
+  "discordUserId": "123456789012345678",
+  "linked": false,
+  "minecraftUsername": null,
+  "minecraftUuid": null,
+  "linkedAt": null,
+  "nation": null,
+  "rank": null,
+  "pending": null
+}
+```
+
+### Unlink
+
+Used by `/unlink`.
+
+```http
+DELETE /discord/users/{discordUserId}/link
+```
+
+Return `200` with JSON or `204 No Content` on success. Prefer `200` with the removed account name so the bot can confirm clearly.
+
+```json
+{
+  "ok": true,
+  "unlinked": true,
+  "discordUserId": "123456789012345678",
+  "minecraftUsername": "Sheyn",
+  "minecraftUuid": "00000000-0000-0000-0000-000000000000"
+}
+```
+
+If the Discord user has no confirmed link or pending link, return:
+
+```http
+404 Not Found
+```
+
+```json
+{
+  "error": "No linked Minecraft account found."
+}
+```
 
 ## Role Sync
 

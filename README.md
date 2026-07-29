@@ -79,10 +79,12 @@ npm start
 - `/digest` posts a Commonwealth Chronicle activity digest once the server API exists.
 - `/rules` shows the server rules.
 - `/link` prepares Discord-to-Minecraft account linking.
+- `/linkstatus` privately shows your current linked Minecraft account or pending link.
 - `/nation` looks up a nation profile once the server API exists.
 - `/online` shows online players once the server API exists.
 - `/player` looks up a Minecraft player profile once the server API exists.
 - `/syncroles` syncs Discord roles from linked Minecraft nation/rank data once the server API exists.
+- `/unlink` privately removes your Discord-to-Minecraft account link once the server API supports it.
 
 ## Minecraft Chat Bridge
 
@@ -95,6 +97,7 @@ The bot includes a framework for two-way Minecraft chat:
 
 See [docs/minecraft-chat-bridge-contract.md](docs/minecraft-chat-bridge-contract.md) for the mod/plugin contract.
 See [docs/server-api-contract.md](docs/server-api-contract.md) for the API endpoints that power player cards, online player intel, nation profiles, role sync, and the weekly digest.
+See [docs/linking-api-drop-in.md](docs/linking-api-drop-in.md) for the focused mod-side linking additions needed by `/linkstatus` and `/unlink`.
 
 To read normal Discord channel messages, enable **Message Content Intent** in the Discord Developer Portal before setting `DISCORD_CHAT_CHANNEL_ID`.
 
