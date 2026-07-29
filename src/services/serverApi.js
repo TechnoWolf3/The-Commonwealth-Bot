@@ -5,6 +5,15 @@ class ServerApiNotConfiguredError extends Error {
   }
 }
 
+class ServerApiRequestError extends Error {
+  constructor(response, message) {
+    super(message || `Server API request failed with ${response.status}`);
+    this.name = 'ServerApiRequestError';
+    this.status = response.status;
+    this.statusText = response.statusText;
+  }
+}
+
 function getApiBaseUrl() {
   return process.env.SERVER_API_BASE_URL;
 }
@@ -38,10 +47,23 @@ async function requestJson(endpoint, options = {}) {
   });
 
   if (!response.ok) {
-    throw new Error(`Server API request failed with ${response.status}`);
+    let message = `Server API request failed with ${response.status}`;
+
+    try {
+      const payload = await response.json();
+      message = payload.error || payload.message || message;
+    } catch {
+      // Keep the status-based message when the API does not return JSON.
+    }
+
+    throw new ServerApiRequestError(response, message);
   }
 
   return response.json();
+}
+
+async function getServerApiHealth() {
+  return requestJson('/health');
 }
 
 async function getBalanceForDiscordUser(discordUserId) {
@@ -80,11 +102,13 @@ async function getWeeklyDigest(days = 7) {
 
 module.exports = {
   ServerApiNotConfiguredError,
+  ServerApiRequestError,
   getBalanceForDiscordUser,
   getDiscordRoleSync,
   getNationProfile,
   getOnlinePlayers,
   getPlayerProfile,
+  getServerApiHealth,
   getWeeklyDigest,
   startAccountLink,
 };

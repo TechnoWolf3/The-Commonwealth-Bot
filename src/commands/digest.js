@@ -11,7 +11,7 @@ module.exports = {
         .setName('days')
         .setDescription('How many days to include')
         .setMinValue(1)
-        .setMaxValue(30)
+        .setMaxValue(90)
         .setRequired(false),
     )
     .addBooleanOption((option) =>

@@ -7,6 +7,7 @@ This is the drop-in contract for the Minecraft mod/plugin API that powers the Di
 - Base URL comes from `SERVER_API_BASE_URL`.
 - Bot-to-server requests include `Authorization: Bearer <SERVER_API_KEY>` when `SERVER_API_KEY` is set.
 - Return JSON for all successful responses.
+- `GET /health` returns `{"ok":true}` and does not require auth.
 - Return `404` when a player or nation does not exist.
 - Return `401` for missing or invalid API keys.
 - Keep response fields stable; extra fields are fine and will be ignored by the bot.
@@ -14,6 +15,7 @@ This is the drop-in contract for the Minecraft mod/plugin API that powers the Di
 ## Endpoints Needed
 
 ```text
+GET  /health
 GET  /players/{minecraftUsername}
 GET  /players/online
 GET  /nations/{nationName}
@@ -56,6 +58,8 @@ Response:
 }
 ```
 
+`nation` is either an object with `name` or `null`. `rank` is either a string or `null`. `avatarUrl` can point to an external skin face render such as Crafatar.
+
 ## Online Player Intel
 
 Used by `/online`.
@@ -76,12 +80,14 @@ Response:
       "uuid": "00000000-0000-0000-0000-000000000000",
       "nation": "Avalon",
       "rank": "Minister",
-      "world": "world",
+      "world": "minecraft:overworld",
       "onlineSince": "2026-07-27T09:15:00Z"
     }
   ]
 }
 ```
+
+`world` may be a raw dimension key.
 
 ## Nation Profile
 
@@ -120,6 +126,17 @@ Response:
 }
 ```
 
+Nation lookup should match display name or internal id case-insensitively. Nullable fields should be returned as `null`, not omitted.
+
+Implementation notes:
+
+- `description` is separate from `motto` and starts `null` until set in-game.
+- `foundedAt` is an ISO-8601 instant and may be `null` for nations created before tracking existed.
+- `capital` is a friendly display name and may be `null`.
+- `balance` is currently computed from member personal balances, not a separate treasury.
+- `allies` and `enemies` are symmetric nation relationships.
+- `color` is a raw Minecraft chat formatting color integer or `null`.
+
 ## Balance
 
 Used by `/balance`.
@@ -135,7 +152,7 @@ Response:
   "discordUserId": "123456789012345678",
   "playerName": "Sheyn",
   "balance": 12500,
-  "currency": "coins"
+  "currency": "Common Dollars"
 }
 ```
 
@@ -167,6 +184,8 @@ Response:
   "expiresAt": "2026-07-27T11:00:00Z"
 }
 ```
+
+Return `201 Created` on success. A new pending link for the same Discord user or same Minecraft account can replace the previous unclaimed one.
 
 Expected in-game flow:
 
@@ -220,6 +239,8 @@ Used by `/digest` and optional automatic weekly posts.
 GET /digest/weekly?days=7
 ```
 
+Clamp `days` to `1` through `90`.
+
 Response:
 
 ```json
@@ -253,6 +274,8 @@ Response:
   ]
 }
 ```
+
+The server can return empty arrays for narrative fields such as `highlights`, `nationChanges`, and `upcomingEvents`. The bot will show calm fallback text instead of inventing story content.
 
 ## Live Event Feed
 

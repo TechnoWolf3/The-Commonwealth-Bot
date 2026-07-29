@@ -1,4 +1,5 @@
 const { MessageFlags, SlashCommandBuilder } = require('discord.js');
+const { formatNumber } = require('../services/formatters');
 const { ServerApiNotConfiguredError, getBalanceForDiscordUser } = require('../services/serverApi');
 
 module.exports = {
@@ -15,7 +16,7 @@ module.exports = {
       const amount = balance.balance ?? balance.amount ?? 'Unknown';
       const currency = balance.currency || 'coins';
 
-      await interaction.editReply(`Balance for **${playerName}**: **${amount} ${currency}**`);
+      await interaction.editReply(`Balance for **${playerName}**: **${formatNumber(amount)} ${currency}**`);
     } catch (error) {
       if (error instanceof ServerApiNotConfiguredError) {
         await interaction.editReply(

@@ -1,5 +1,5 @@
 const { MessageFlags, SlashCommandBuilder } = require('discord.js');
-const { ServerApiNotConfiguredError, startAccountLink } = require('../services/serverApi');
+const { ServerApiNotConfiguredError, ServerApiRequestError, startAccountLink } = require('../services/serverApi');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -33,6 +33,13 @@ module.exports = {
       if (error instanceof ServerApiNotConfiguredError) {
         await interaction.editReply(
           `Linking is not connected yet. Framework ready: this command will link your Discord account to **${username}** once the server API/plugin exists.`,
+        );
+        return;
+      }
+
+      if (error instanceof ServerApiRequestError && error.status === 404) {
+        await interaction.editReply(
+          `I could not find a Minecraft account named **${username}**. Check the spelling, then try again.`,
         );
         return;
       }

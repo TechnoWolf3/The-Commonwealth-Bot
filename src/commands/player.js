@@ -1,6 +1,6 @@
 const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
 const { formatDate, formatList, formatNumber } = require('../services/formatters');
-const { ServerApiNotConfiguredError, getPlayerProfile } = require('../services/serverApi');
+const { ServerApiNotConfiguredError, ServerApiRequestError, getPlayerProfile } = require('../services/serverApi');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -58,6 +58,11 @@ module.exports = {
         await interaction.editReply(
           'Player lookup is not connected yet. This command is ready for the future server API/plugin.',
         );
+        return;
+      }
+
+      if (error instanceof ServerApiRequestError && error.status === 404) {
+        await interaction.editReply(`I could not find a Minecraft player named **${username}**.`);
         return;
       }
 

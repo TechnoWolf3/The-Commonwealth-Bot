@@ -72,6 +72,7 @@ npm start
 
 ## Commands
 
+- `/apihealth` privately checks whether the configured server API is reachable.
 - `/ping` checks Discord gateway latency.
 - `/status` checks Minecraft server status once `MINECRAFT_HOST` is configured.
 - `/balance` privately checks the linked player's balance once the server API exists.

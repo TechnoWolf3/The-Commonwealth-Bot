@@ -1,6 +1,6 @@
 const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
 const { formatDate, formatList, formatNumber, truncate } = require('../services/formatters');
-const { ServerApiNotConfiguredError, getNationProfile } = require('../services/serverApi');
+const { ServerApiNotConfiguredError, ServerApiRequestError, getNationProfile } = require('../services/serverApi');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -26,7 +26,7 @@ module.exports = {
 
       const embed = new EmbedBuilder()
         .setTitle(nation.name || nationName)
-        .setColor(nation.color || 0x5865f2)
+        .setColor(nation.color ?? 0x5865f2)
         .setDescription(truncate(nation.description || nation.motto || 'No public description set.', 4096))
         .addFields(
           { name: 'Leader', value: String(leader), inline: true },
@@ -51,6 +51,11 @@ module.exports = {
         await interaction.editReply(
           'Nation profiles are not connected yet. The command is ready for the server API endpoint `/nations/{name}`.',
         );
+        return;
+      }
+
+      if (error instanceof ServerApiRequestError && error.status === 404) {
+        await interaction.editReply(`I could not find a nation named **${nationName}**.`);
         return;
       }
 
